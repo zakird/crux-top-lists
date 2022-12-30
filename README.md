@@ -18,7 +18,9 @@ Page Loads and Time on Page ([Ruth et
 al.](https://zakird.com/papers/browsing.pdf)) and is a reasonable
 approximation:
 
+<p align="center">
 <img width="500" alt="CDF of User Traffic" src="https://user-images.githubusercontent.com/201296/210084850-a31e3d5d-7108-48aa-8271-c05a7ee10a23.png">
+</p>
 
 In addition, Chrome publishes country-specific top lists in BigQuery. The
 following SQL can be used to generate similarly a similar list of all globally
