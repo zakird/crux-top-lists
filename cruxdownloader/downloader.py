@@ -24,10 +24,10 @@ class CrUXDownloader:
         GROUP BY country_code, origin, experimental.popularity.rank
         ORDER BY country_code, experimental.popularity.rank;"""
 
-    def __init__(self, credential_path=None, credential_json=None):
-        if not credential_patht and not credential_json:
+    def __init__(self, credentials_path=None, credentials_json=None):
+        if not credentials_path and not credentials_json:
             raise Exception("No credentials supplied for Google Cloud")
-        self._bq_client = bigquery.Client.from_service_account_json(credential_path)
+        self._bq_client = bigquery.Client.from_service_account_json(credentials_path)
 
     def dump_month_to_csv(self, scope, yyyymm: int, path):
         assert scope in {"global", "country"}
@@ -63,8 +63,10 @@ class CrUXRepoManager:
                 self.COUNTRY_DIR_NAME)
 
     def _get_existing_YYYYMM(self, path):
-        for directory in os.listdir(path):
-            yield int(directory[0:4]), int(directory[4:6])
+        for f in os.listdir(path):
+            if not f.startswith("2"):
+                continue
+            yield int(f[0:4]), int(f[4:6])
 
     def _to_fetch_YYYYMM(self, path):
         valid = set(self._iter_valid_YYYYMM())
@@ -90,8 +92,8 @@ class CrUXRepoManager:
            os.remove(filename)
 
     def download(self, credentials_path=None, credentials_json=None):
-        downloader = CrUXDownloader(path=credentials_path,
-                credentials_blob=credentials_json)
+        downloader = CrUXDownloader(credentials_path=credentials_path,
+                credentials_json=credentials_json)
         self._make_directories()
         for scope in {"global",}:
         #for scope in {"global", "country"}:
@@ -102,4 +104,13 @@ class CrUXRepoManager:
                 results_path = os.path.join(data_directory, filename)
                 downloader.dump_month_to_csv(scope, yyyymm, results_path)
                 self._gzip(results_path)
+
+    def update_current(self, dest):
+        # Global Only right now
+        latest = max(self._get_existing_YYYYMM(self._global_directory))
+        latest_filename = str(latest[0]) + str(latest[1]) + ".csv.gz"
+        src_path = os.path.join(self._global_directory, latest_filename)
+        assert(os.path.exists(src_path))
+        dst_path = os.path.join(self._global_directory, dest)
+        shutil.copyfile(src_path, dst_path)
 
