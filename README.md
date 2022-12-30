@@ -6,7 +6,7 @@ Report](https://developer.chrome.com/docs/crux/) is _significantly_ more
 accurate than other top lists like the Alexa Top Million and Tranco Top
 Million.
 
-This repository caches CSV downloads of the Chrome top sites, queried from the
+This repository caches a CSV version of the Chrome top sites, queried from the
 CrUX data in Google BigQuery. You can browse all of the cached lists
 [here](https://github.com/zakird/crux-top-lists/tree/main/data/global). The
 most up-to-date top million global websites can be downloaded directly at:
