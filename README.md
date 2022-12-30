@@ -22,7 +22,7 @@ The CrUX dataset has several important differences from other top lists:
    listed randomly.
 
 2. Websites are identified by _origin_ (e.g., https://www.google.com) not
-   be domain or FQDN.
+   by domain or FQDN.
 
 3. Data is released monthly, typically on the second Tuesday of the month.
 
