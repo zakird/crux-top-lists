@@ -26,7 +26,7 @@ The CrUX dataset has several important differences from other top lists:
 
 3. Data is released monthly, typically on the second Tuesday of the month.
 
-For example, this is what data looks like:
+This is an example of what the data looks like:
 
 ```
 origin,rank
