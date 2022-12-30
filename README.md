@@ -40,6 +40,10 @@ https://www.w3schools.com,1000
 https://animekimi.com,1000
 ```
 
+More information about CrUX and data collection methodology can be found on its
+official website: https://developer.chrome.com/docs/crux/about/.
+
+
 ### Why 1 Million Sites?
 
 This repository does not contain all of the website ranking data published by
@@ -76,9 +80,17 @@ SELECT distinct origin, experimental.popularity.rank
 
 ### Country-Specific Websites
 
-In addition, Chrome publishes country-specific top lists in BigQuery.
+Ruth et al. also showed that browsing behavior is localized and a global top
+list skews towards global sites (e.g., technology and gaming) and away from
+local sites (e.g., education, government, and finance). As such, researchers
+may also want to investigate whether trends hold across individual countries.
 
-The following SQL can be used to dump out country-specific top websites:
+<p align="center">
+<img width="500" alt="Skew in Websites" src="https://user-images.githubusercontent.com/201296/210107148-3d0f8a03-dbf5-43fc-8ae8-072dbb97fb15.png">
+</p>
+
+Chrome publishes country-specific top lists in BigQuery and the following SQL
+can be used to dump out country-specific top websites:
 
 ```sql
 SELECT distinct country_code, origin, experimental.popularity.rank
