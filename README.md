@@ -16,15 +16,15 @@ https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/global/current
 
 The CrUX dataset has several important differences from other top lists:
 
-	1. Websites are bucketed by rank magnitude order, not by specific rank.
-	   Rank will be 1000, 10K, 100K, or 1M in the provided files. The data is
-       ordered by rank magnitude. Within each order of magnitude, websites are
-       listed randomly.
+1. Websites are bucketed by rank magnitude order, not by specific rank.
+   Rank will be 1000, 10K, 100K, or 1M in the provided files. The data is
+   ordered by rank magnitude. Within each order of magnitude, websites are
+   listed randomly.
 
-	2. Websites are identified by _origin_ (e.g., https://www.google.com) not
-	   be domain or FQDN.
+2. Websites are identified by _origin_ (e.g., https://www.google.com) not
+   be domain or FQDN.
 
-	3. Data is released monthly, typically on the second Tuesday of the month.
+3. Data is released monthly, typically on the second Tuesday of the month.
 
 For example, this is what data looks like:
 
