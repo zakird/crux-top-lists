@@ -7,18 +7,19 @@ accurate than other top lists like the Alexa Top Million and Tranco Top
 Million.
 
 This repository contains a cache of the global top million websites lists that
-Chrome publishes in Google BigQuery. The most up-to-date top million global
-websites can be downloaded directly at:
-https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/global/current.csv.gz. Historical data is available [here](https://github.com/zakird/crux-top-lists/tree/main/data/global).
+Chrome publishes in Google BigQuery. You can browse all data
+[here](https://github.com/zakird/crux-top-lists/tree/main/data/global). The
+most up-to-date top million global websites can be downloaded directly at:
+https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/global/current.csv.gz.
 
 ### Data Structure
 
-### Why 1 Million?
+### Why 1 Million Sites?
 
 This repository does not contain all of the website ranking data published by
-Chrome. Their global list of popular websites is approximately 15M websites.
-The top million websites captures over 95% of user traffic in Chrome by both
-Page Loads and Time on Page ([Ruth et
+Chrome. Their global list of popular websites contains approximately 15M
+websites (~650MB download). The top million websites captures over 95% of user
+traffic in Chrome by both Page Loads and Time on Page ([Ruth et
 al.](https://zakird.com/papers/browsing.pdf)) and is a reasonable
 approximation:
 
