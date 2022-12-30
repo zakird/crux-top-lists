@@ -44,14 +44,24 @@ https://animekimi.com,1000
 
 This repository does not contain all of the website ranking data published by
 Chrome. Their global list of popular websites contains approximately 15M
-websites (~650MB download). The top million websites captures over 95% of user
-traffic in Chrome by both Page Loads and Time on Page ([Ruth et
+websites. The top million websites captures over 95% of user traffic in Chrome
+by both Page Loads and Time on Page ([Ruth et
 al.](https://zakird.com/papers/browsing.pdf)) and is a reasonable
 approximation:
 
 <p align="center">
 <img width="500" alt="CDF of User Traffic" src="https://user-images.githubusercontent.com/201296/210084850-a31e3d5d-7108-48aa-8271-c05a7ee10a23.png">
 </p>
+
+If you want to use more or fewer websites, this is the approximate breakdown of coverage:
+
+| Websites    | Page Loads  |
+| ----------- | ----------- |
+| 1000        | 50%         |
+| 10K         | 70%         |
+| 100K        | 87%         |
+| 1M          | 95%         |
+| 5M          | 99%         |
 
 The following SQL can be used to generate similarly a similar list of all
 globally popular websites:
