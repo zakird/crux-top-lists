@@ -14,7 +14,7 @@ class CrUXDownloader:
 
     GLOBAL_SQL = """SELECT distinct origin, experimental.popularity.rank
         FROM `chrome-ux-report.experimental.global`
-        WHERE yyyymm = ? AND experimental.popularity.rank <= 1000000
+        WHERE yyyymm = ? AND experimental.popularity.rank <= 10000000
         GROUP BY origin, experimental.popularity.rank
         ORDER BY experimental.popularity.rank;"""
 
@@ -24,7 +24,9 @@ class CrUXDownloader:
         GROUP BY country_code, origin, experimental.popularity.rank
         ORDER BY country_code, experimental.popularity.rank;"""
 
-    def __init__(self, credential_path):
+    def __init__(self, credential_path=None, credential_json=None):
+        if not credential_patht and not credential_json:
+            raise Exception("No credentials supplied for Google Cloud")
         self._bq_client = bigquery.Client.from_service_account_json(credential_path)
 
     def dump_month_to_csv(self, scope, yyyymm: int, path):
@@ -87,8 +89,9 @@ class CrUXRepoManager:
         if delete_original:
            os.remove(filename)
 
-    def run(self, credentials=None):
-        downloader = CrUXDownloader("credentials.json")
+    def download(self, credentials_path=None, credentials_json=None):
+        downloader = CrUXDownloader(path=credentials_path,
+                credentials_blob=credentials_json)
         self._make_directories()
         for scope in {"global",}:
         #for scope in {"global", "country"}:
