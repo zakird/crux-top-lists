@@ -40,7 +40,7 @@ https://www.w3schools.com,1000
 https://animekimi.com,1000
 ```
 
-More information about CrUX and data collection methodology can be found on its
+More information about CrUX and its data collection methodology can be found on its
 official website: https://developer.chrome.com/docs/crux/about/.
 
 
