@@ -1,7 +1,7 @@
 # Cached Chrome Top Million Websites
 
 [Recent research](https://zakird.com/papers/toplists.pdf) showed that the top
-million most popular websites published by Google Chrome via the [Chrome UX
+million most popular websites published by Google Chrome via their [UX
 Report](https://developer.chrome.com/docs/crux/) (CrUX) is _significantly_ more
 accurate than other top lists like the Alexa Top Million and Tranco Top
 Million.
