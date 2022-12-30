@@ -11,9 +11,9 @@ Chrome publishes in Google BigQuery. The most up-to-date top million global
 websites can be downloaded directly at:
 https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/global/current.csv.gz. Historical data is available [here](https://github.com/zakird/crux-top-lists/tree/main/data/global).
 
-#### Data Structure
+### Data Structure
 
-#### Why 1 Million?
+### Why 1 Million?
 
 This repository does not contain all of the website ranking data published by
 Chrome. Their global list of popular websites is approximately 15M websites.
@@ -37,7 +37,7 @@ SELECT distinct origin, experimental.popularity.rank
     ORDER BY experimental.popularity.rank;
 ```
 
-#### Country-Specific Websites
+### Country-Specific Websites
 
 In addition, Chrome publishes country-specific top lists in BigQuery.
 
