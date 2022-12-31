@@ -2,9 +2,9 @@
 
 [Recent research](https://zakird.com/papers/toplists.pdf) showed that the top
 million most popular websites published by Google Chrome via their [UX
-Report](https://developer.chrome.com/docs/crux/) (CrUX) is _significantly_ more
+Report](https://developer.chrome.com/docs/crux/) (CrUX) is significantly more
 accurate than other top lists like the Alexa Top Million and Tranco Top
-Million.
+Million. 
 
 This repository caches a CSV version of the Chrome top sites, queried from the
 CrUX data in Google BigQuery. You can browse all of the cached lists
@@ -40,9 +40,11 @@ https://www.w3schools.com,1000
 https://animekimi.com,1000
 ```
 
-More information about CrUX and its data collection methodology can be found on its
+Websites are ranked by completed pageloads (measured
+by First Contentful Paint) and aggregated by web origin. The dataset
+adheres as closely as possible to user-initiated pageloads (e.g., it
+excludes traffic from iframes). More information about CrUX and its data collection methodology can be found on its
 official website: https://developer.chrome.com/docs/crux/about/.
-
 
 ### Why 1 Million Sites?
 
@@ -80,7 +82,7 @@ SELECT distinct origin, experimental.popularity.rank
 
 ### Country-Specific Websites
 
-Ruth et al. also showed that browsing behavior is localized and a global top
+[Ruth et al.](https://zakird.com/papers/browsing.pdf) also showed that browsing behavior is localized and a global top
 list skews towards global sites (e.g., technology and gaming) and away from
 local sites (e.g., education, government, and finance). As such, researchers
 may also want to investigate whether trends hold across individual countries.
@@ -107,3 +109,21 @@ specifically interested in looking at domain popularity in China, consider
 [Building an Open, Robust, and Stable Voting-Based Domain Top
 List](https://faculty.cc.gatech.edu/~frankli/papers/xie_usenix2022.pdf), which
 is based on data collected from 114DNS, a large DNS provider in China.
+
+
+### Supporting Research
+
+The data  in this repo is all publicly posted by Google to their
+CrUX dataset in Google BigQuery. This is simply a cache of that public data.
+Many of the arguments in this README are based
+on two recent research papers. The first describes how we evaluated the accuracy
+of lists of top websites. The second is a study on web browsing more broadly.
+
+**[Toppling Top Lists: Evaluating the Accuracy of Popular Website Lists](https://zakird.com/papers/toplists.pdf)**<br/>
+Kimberly Ruth, Deepak Kumar, Brandon Wang, Luke Valenta, and Zakir Durumeric<br/>
+_ACM Internet Measurement Conference_ (IMC), October 2022
+
+**[A World Wide View of Browsing the World Wide Web](https://zakird.com/papers/browsing.pdf)**<br/>
+Kimberly Ruth, Aurore Fass, Jonathan Azose, Mark Pearson, Emma Thomas, Caitlin Sadowski, and Zakir Durumeric<br/>
+_ACM Internet Measurement Conference_ (IMC), October 2022
+
