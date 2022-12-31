@@ -67,8 +67,8 @@ If you want to use more or fewer websites, this is the approximate breakdown of 
 | 1M          | 95%         |
 | 5M          | 99%         |
 
-The following SQL can be used to generate similarly a similar list of all
-globally popular websites:
+The following SQL can be used to generate a similar list of all globally
+popular websites:
 
 ```sql
 SELECT distinct origin, experimental.popularity.rank
@@ -100,3 +100,10 @@ SELECT distinct country_code, origin, experimental.popularity.rank
     GROUP BY country_code, origin, experimental.popularity.rank
     ORDER BY country_code, experimental.popularity.rank;
 ```
+
+The CrUX dataset is based on data collected from Google Chrome and is thus
+biased away from countries with limited Chrome usage (e.g., China). If you're
+specifically interested in looking at domain popularity in China, consider
+[Building an Open, Robust, and Stable Voting-Based Domain Top
+List](https://faculty.cc.gatech.edu/~frankli/papers/xie_usenix2022.pdf), which
+is based on data collected from 114DNS, a large DNS provider in China.
