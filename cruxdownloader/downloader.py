@@ -38,7 +38,10 @@ class CrUXDownloader:
             ]
         )
         df = self._bq_client.query(query, job_config=job_config).to_dataframe()
+        if df.empty:
+            return
         df.to_csv(path, index=False, header=True)
+        return path
 
 
 class CrUXRepoManager:
@@ -102,8 +105,8 @@ class CrUXRepoManager:
                 print("Fetching {} {}".format(scope, yyyymm))
                 filename = str(yyyymm) + ".csv"
                 results_path = os.path.join(data_directory, filename)
-                downloader.dump_month_to_csv(scope, yyyymm, results_path)
-                self._gzip(results_path)
+                if downloader.dump_month_to_csv(scope, yyyymm, results_path):
+                    self._gzip(results_path)
 
     def update_current(self, dest):
         # Global Only right now
