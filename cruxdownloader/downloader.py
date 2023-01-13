@@ -14,7 +14,7 @@ class CrUXDownloader:
 
     GLOBAL_SQL = """SELECT distinct origin, experimental.popularity.rank
         FROM `chrome-ux-report.experimental.global`
-        WHERE yyyymm = ? AND experimental.popularity.rank <= 10000000
+        WHERE yyyymm = ? AND experimental.popularity.rank <= 1000000
         GROUP BY origin, experimental.popularity.rank
         ORDER BY experimental.popularity.rank;"""
 
