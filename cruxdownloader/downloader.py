@@ -111,7 +111,7 @@ class CrUXRepoManager:
     def update_current(self, dest):
         # Global Only right now
         latest = max(self._get_existing_YYYYMM(self._global_directory))
-        latest_filename = str(latest[0]) + str(latest[1]) + ".csv.gz"
+        latest_filename = str(latest[0]) + str(latest[1]).zfill(2) + ".csv.gz"
         src_path = os.path.join(self._global_directory, latest_filename)
         assert(os.path.exists(src_path))
         dst_path = os.path.join(self._global_directory, dest)
