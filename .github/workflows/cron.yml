@@ -1,0 +1,7 @@
+name: Update Daily
+on:
+  schedule:
+    - cron: "30 2 * * *"
+jobs:
+  update-data:
+    uses: ./.github/workflows/github-actions.yml

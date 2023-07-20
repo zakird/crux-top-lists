@@ -1,7 +1,5 @@
-name: Fetch Month
-on:
-  schedule:
-    - cron: "30 2 * * *"
+name: Update Data Repo
+on: workflow_call
 jobs:
   download-bigquery-agg:
     runs-on: ubuntu-latest
