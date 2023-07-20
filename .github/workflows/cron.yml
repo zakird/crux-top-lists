@@ -5,3 +5,4 @@ on:
 jobs:
   update-data:
     uses: ./.github/workflows/github-actions.yml
+    secrets: inherit
