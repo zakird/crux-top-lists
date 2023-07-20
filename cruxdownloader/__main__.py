@@ -1,12 +1,21 @@
-import sys
+import argparse
 
 from downloader import CrUXRepoManager
 
+
 def main(directory, credentials_path):
-    #CrUXDownloader("credentials.json").dump_month_to_csv("country", 202211, "test")
     mgr = CrUXRepoManager(directory)
-    mgr.download(credentials_path)
+    credentials_env = None if credentials_path else True
+    mgr.download(credentials_path, credentials_env=credentials_env)
     mgr.update_current("current.csv.gz")
 
+
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(
+        prog='cruxdownloader',
+        description='Download CrUX top lists aggregated by month',
+    )
+    parser.add_argument('directory', required=True)
+    parser.add_argument('--credential-file', default=None)
+    args = parser.parse_args()
+    main(args.directory, args.credential_file)

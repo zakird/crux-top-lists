@@ -9,6 +9,8 @@ import gzip
 import shutil
 
 from google.cloud import bigquery
+from google.oauth2 import service_account
+
 
 class CrUXDownloader:
 
@@ -24,10 +26,17 @@ class CrUXDownloader:
         GROUP BY country_code, origin, experimental.popularity.rank
         ORDER BY country_code, experimental.popularity.rank;"""
 
-    def __init__(self, credentials_path=None, credentials_json=None):
-        if not credentials_path and not credentials_json:
+    def __init__(self, credentials_path=None, credentials_json=None, credentials_env=False):
+        if not credentials_path and not credentials_json and not credentials_env:
             raise Exception("No credentials supplied for Google Cloud")
-        self._bq_client = bigquery.Client.from_service_account_json(credentials_path)
+        if credentials_env:
+            self._bq_client = bigquery.Client()
+        elif credentials_json:
+            obj = json.loads(credentials_json)
+            credentials = service_account.Credentials.from_service_account_info(obj)
+            self._bq_client = bigquery.Client(credentials=credentials)
+        else:
+            self._bq_client = bigquery.Client.from_service_account_json(credentials_path)
 
     def dump_month_to_csv(self, scope, yyyymm: int, path):
         assert scope in {"global", "country"}
@@ -94,9 +103,12 @@ class CrUXRepoManager:
         if delete_original:
            os.remove(filename)
 
-    def download(self, credentials_path=None, credentials_json=None):
-        downloader = CrUXDownloader(credentials_path=credentials_path,
-                credentials_json=credentials_json)
+    def download(self, credentials_path=None, credentials_json=None, credentials_env=False):
+        downloader = CrUXDownloader(
+            credentials_path=credentials_path,
+            credentials_json=credentials_json,
+            credentials_env=credentials_env,
+        )
         self._make_directories()
         for scope in {"global",}:
         #for scope in {"global", "country"}:
