@@ -1,4 +1,4 @@
-name: Update Daily
+name: Update Manual
 on: workflow_dispatch
 jobs:
   update-data-manual:
