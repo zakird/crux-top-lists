@@ -19,4 +19,4 @@ jobs:
         with:
           credentials_json: ${{ secrets.bq }}
       - id: "download"
-        run: "python3 -m cruxdownloader data/global"
+        run: "python3 -m cruxdownloader data"
