@@ -18,7 +18,7 @@ classifiers = [
 ]
 dependencies = [
 	"google-cloud-bigquery",
-	"dateutil",
+	"python-dateutil",
 	"pandas",
 	"pyarrow",
 	"db-dtypes"
