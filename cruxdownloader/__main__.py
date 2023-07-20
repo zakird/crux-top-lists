@@ -1,6 +1,7 @@
 import argparse
+import os
 
-from downloader import CrUXRepoManager
+from .downloader import CrUXRepoManager
 
 
 def main(directory, credentials_path):
@@ -15,7 +16,7 @@ if __name__ == "__main__":
         prog='cruxdownloader',
         description='Download CrUX top lists aggregated by month',
     )
-    parser.add_argument('directory', required=True)
+    parser.add_argument('directory')
     parser.add_argument('--credential-file', default=None)
     args = parser.parse_args()
-    main(args.directory, args.credential_file)
+    main(args.directory or os.getcwd(), args.credential_file)
