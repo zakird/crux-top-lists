@@ -1,6 +1,0 @@
-name: Update Manual
-on: workflow_dispatch
-jobs:
-  update-data-manual:
-    uses: ./.github/workflows/github-actions.yml
-    secrets: inherit
