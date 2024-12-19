@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+ - family-names: "Durumeric"
+   given-names: "Zakir"
+   orcid: "https://orcid.org/0000-0002-9647-4192"
+ - family-names: "Adrian"
+   given-names: "David"
+title: "Chrome (CrUX) Top Million Websites"
+date-released: 2022-12
+url: "https://github.com/zakird/crux-top-lists"
