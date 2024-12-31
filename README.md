@@ -1,10 +1,10 @@
 # Chrome (CrUX) Top Million Websites
 
-[Recent research](https://zakird.com/papers/toplists.pdf) showed that the top
+[Recent research](https://zakird.com/papers/toplists.pdf) has shown that the top
 million most popular websites published by Google Chrome via their [UX
 Report](https://developer.chrome.com/docs/crux/) (CrUX) is significantly more
 accurate than other top lists like the Alexa Top Million and Tranco Top
-Million.
+Million for capturing the most popular websites on the Internet.
 
 This repository caches a CSV version of the Chrome top sites, queried from the
 public CrUX data in Google BigQuery. You can browse all of the cached lists
