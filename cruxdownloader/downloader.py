@@ -20,11 +20,15 @@ class CrUXDownloader:
         GROUP BY origin, experimental.popularity.rank
         ORDER BY experimental.popularity.rank;"""
 
-    COUNTRY_SQL = """SELECT distinct country_code, origin, experimental.popularity.rank
+    LIST_COUNTRIES_SQL = """SELECT distinct country_code FROM
+        `chrome-ux-report.experimental.country`"""
+
+    COUNTRY_SQL = """SELECT distinct origin, experimental.popularity.rank
         FROM `chrome-ux-report.experimental.country`
-        WHERE yyyymm = ? AND experimental.popularity.rank <= 1000000
-        GROUP BY country_code, origin, experimental.popularity.rank
-        ORDER BY country_code, experimental.popularity.rank;"""
+        WHERE yyyymm = ? AND country_code = ?
+            AND experimental.popularity.rank <= 1000000
+        GROUP BY origin, experimental.popularity.rank
+        ORDER BY experimental.popularity.rank;"""
 
     def __init__(self, credentials_path=None, credentials_json=None, credentials_env=False):
         if not credentials_path and not credentials_json and not credentials_env:
@@ -38,13 +42,30 @@ class CrUXDownloader:
         else:
             self._bq_client = bigquery.Client.from_service_account_json(credentials_path)
 
-    def dump_month_to_csv(self, scope, yyyymm: int, path):
-        assert scope in {"global", "country"}
-        query = self.GLOBAL_SQL if scope == "global" else self.COUNTRY_SQL
-        job_config = bigquery.QueryJobConfig(
-            query_parameters=[
+    def get_countries(self):
+        job_config = bigquery.QueryJobConfig()
+        df= self._bq_client.query(self.LIST_COUNTRIES_SQL, job_config=job_config).to_dataframe()
+        if df.empty:
+            raise Exception("Unable to fetch countries")
+        for _, r in df.sample(frac=1).iterrows():
+            yield(r["country_code"])
+
+    def dump_month_to_csv(self, scope, yyyymm: int, path, country_code=None):
+        query_parameters = [
                 bigquery.ScalarQueryParameter(None, "INT64", yyyymm),
             ]
+        if scope == "global":
+            query = self.GLOBAL_SQL
+        elif scope == "country":
+            query = self.COUNTRY_SQL
+            assert(country_code)
+            query_parameters.append(bigquery.ScalarQueryParameter(None,
+                                                                  "STRING",
+                                                                  country_code))
+        else:
+            raise Exception("Invalid Scope")
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=query_parameters
         )
         df = self._bq_client.query(query, job_config=job_config).to_dataframe()
         if df.empty:
@@ -109,16 +130,31 @@ class CrUXRepoManager:
             credentials_json=credentials_json,
             credentials_env=credentials_env,
         )
+
         self._make_directories()
-        for scope in {"global",}:
-        #for scope in {"global", "country"}:
-            data_directory = self._global_directory if scope == "global" else self._country_directory
+        # global
+        data_directory = self._global_directory
+        for yyyymm in self._to_fetch_YYYYMM(data_directory):
+            print("Fetching {} {}".format("global", yyyymm))
+            filename = str(yyyymm) + ".csv"
+            results_path = os.path.join(data_directory, filename)
+            if downloader.dump_month_to_csv("global", yyyymm, results_path):
+                self._gzip(results_path)
+        # per-country data
+        parent_data_directory = self._country_directory
+        for country in downloader.get_countries():
+            print("Processing Country: {}".format(country))
+            data_directory = os.path.join(parent_data_directory, country)
+            if not os.path.exists(data_directory):
+                os.mkdir(data_directory)
             for yyyymm in self._to_fetch_YYYYMM(data_directory):
-                print("Fetching {} {}".format(scope, yyyymm))
+                print("Fetching {} {}".format(country, yyyymm))
                 filename = str(yyyymm) + ".csv"
                 results_path = os.path.join(data_directory, filename)
-                if downloader.dump_month_to_csv(scope, yyyymm, results_path):
+                if downloader.dump_month_to_csv("country", yyyymm, results_path,
+                                                country):
                     self._gzip(results_path)
+
 
     def update_current(self, dest):
         # Global Only right now
