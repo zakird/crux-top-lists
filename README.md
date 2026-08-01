@@ -8,9 +8,14 @@ Million for capturing the most popular websites on the Internet.
 
 This repository caches a CSV version of the Chrome top sites, queried from the
 public CrUX data in Google BigQuery. You can browse all of the cached lists
-[here](https://github.com/zakird/crux-top-lists/tree/main/data/global). The
-most up-to-date top million global websites can be downloaded directly at:
-https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/global/current.csv.gz.
+[here](https://github.com/zakird/crux-top-lists/tree/main/data).
+
+
+| Name | URL | Details |
+| -- | -- | -- |
+| Global | `https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/global/current.csv.gz` | Most up-to-date top million global websites |
+| Country | `https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/country/{COUNTRY_CODE}/{YYYYMM}.csv.gz` | Replace {COUNTRY_CODE} and {YYYYMM} |
+
 
 ### Data Structure
 
