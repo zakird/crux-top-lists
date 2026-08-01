@@ -14,7 +14,7 @@ public CrUX data in Google BigQuery. You can browse all of the cached lists
 | Name | URL | Details |
 | -- | -- | -- |
 | Global | `https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/global/current.csv.gz` | Most up-to-date top million global websites |
-| Country | `https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/country/{COUNTRY_CODE}/{YYYYMM}.csv.gz` | Replace {COUNTRY_CODE} and {YYYYMM} |
+| Country | `https://raw.githubusercontent.com/zakird/crux-top-lists/main/data/country/{COUNTRY_CODE}/current.csv.gz` | Most up-to-date top million {COUNTRY_CODE} websites |
 
 
 ### Data Structure
