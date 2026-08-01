@@ -2,35 +2,76 @@ name: Update Data Repo
 on:
   workflow_call:
   workflow_dispatch:
+
 jobs:
   download-bigquery-agg:
     runs-on: ubuntu-latest
     steps:
       - id: "checkout"
-        uses: "actions/checkout@v3"
+        uses: "actions/checkout@v4"
+
       - id: "python"
-        uses: actions/setup-python@v4
+        uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
           cache: "pip"
+
       - id: "pip"
         run: pip install .
+
       - id: "auth"
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@v1"
         with:
           credentials_json: ${{ secrets.bq }}
+
       - id: "download"
         run: "python3 -m cruxdownloader data"
+
       - id: "commit"
-        name: Commit and push if it changed
+        name: commit data changes
+        shell: bash
         run: |-
+          set -euo pipefail
+
           git config user.name "Automated"
           git config user.email "actions@users.noreply.github.com"
+
+          # 1) For each data/country/{CC} dir, copy latest YYYYMM.csv.gz -> current.csv.gz
+          shopt -s nullglob
+          for dir in data/country/*; do
+            [[ -d "$dir" ]] || continue
+            latest_files=( "$dir"/??????.csv.gz )
+            if (( ${#latest_files[@]} == 0 )); then
+              echo "No YYYYMM.csv.gz in $dir, skipping."
+              continue
+            fi
+
+            latest_file="$(printf '%s\n' "${latest_files[@]}" | sort | tail -n 1)"
+            echo "Copying $latest_file -> $dir/current.csv.gz"
+            cp -f "$latest_file" "$dir/current.csv.gz"
+          done
+
+          # 2) Commit/push only if something changed
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
           git add data/*
-          timestamp=$(date -u --rfc-3339=date)
+          timestamp="$(date -u +%Y%m)"
+
+          # Commit data changes (if any)
           git commit -m "Updated: ${timestamp}" || exit 0
-          echo ${timestamp} > latest.txt
+
+          # Update latest.txt (and commit it only if it changed)
+          echo "${timestamp}" > latest.txt
           git add latest.txt
-          git commit -m "Updated: ${timestamp}" 
+
+          if git diff --cached --quiet; then
+            echo "No latest.txt change to commit."
+          else
+            git commit -m "Updated: ${timestamp}"
+          fi
+
           git push
