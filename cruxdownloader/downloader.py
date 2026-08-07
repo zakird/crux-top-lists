@@ -156,12 +156,50 @@ class CrUXRepoManager:
                     self._gzip(results_path)
 
 
-    def update_current(self, dest):
-        # Global Only right now
-        latest = max(self._get_existing_YYYYMM(self._global_directory))
-        latest_filename = str(latest[0]) + str(latest[1]).zfill(2) + ".csv.gz"
+    def _latest_yyyymm(self, path):
+        latest = max(self._get_existing_YYYYMM(path))
+        return str(latest[0]) + str(latest[1]).zfill(2)
+
+    def update_current(self, dest="current.csv.gz"):
+        # Global current.csv.gz
+        latest_yyyymm = self._latest_yyyymm(self._global_directory)
+
+        latest_filename = latest_yyyymm + ".csv.gz"
         src_path = os.path.join(self._global_directory, latest_filename)
         assert(os.path.exists(src_path))
+
         dst_path = os.path.join(self._global_directory, dest)
         shutil.copyfile(src_path, dst_path)
 
+        # Country current.csv.gz
+        if os.path.exists(self._country_directory):
+            for country in os.listdir(self._country_directory):
+                country_directory = os.path.join(
+                    self._country_directory,
+                    country,
+                )
+
+                if not os.path.isdir(country_directory):
+                    continue
+
+                existing = list(self._get_existing_YYYYMM(country_directory))
+                if not existing:
+                    continue
+
+                latest = max(existing)
+                latest_yyyymm = str(latest[0]) + str(latest[1]).zfill(2)
+
+                latest_filename = latest_yyyymm + ".csv.gz"
+                src_path = os.path.join(
+                    country_directory,
+                    latest_filename,
+                )
+
+                if os.path.exists(src_path):
+                    dst_path = os.path.join(country_directory, dest)
+                    shutil.copy(src_path, dst_path)
+
+        # /data/latest.txt
+        latest_path = os.path.join(self._data_directory, "latest.txt")
+        with open(latest_path, "w") as f:
+            f.write(latest_yyyymm + "\n")
