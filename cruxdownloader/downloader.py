@@ -13,7 +13,6 @@ from google.oauth2 import service_account
 
 
 class CrUXDownloader:
-
     GLOBAL_SQL = """SELECT distinct origin, experimental.popularity.rank
         FROM `chrome-ux-report.experimental.global`
         WHERE yyyymm = ? AND experimental.popularity.rank <= 1000000
@@ -76,7 +75,6 @@ class CrUXDownloader:
 
 
 class CrUXRepoManager:
-
     MIN_YYYYMM = datetime.datetime(2025, 1, 1)
     GLOBAL_DIR_NAME = "global"
     COUNTRY_DIR_NAME = "country"
@@ -85,8 +83,7 @@ class CrUXRepoManager:
     def _iter_valid_YYYYMM(cls):
         now = datetime.datetime.now()
         last_month = now + relativedelta.relativedelta(months=-1)
-        for dt in rrule.rrule(rrule.MONTHLY, dtstart=cls.MIN_YYYYMM,
-                              until=last_month):
+        for dt in rrule.rrule(rrule.MONTHLY, dtstart=cls.MIN_YYYYMM, until=last_month):
             yield (dt.year, dt.month)
 
     def __init__(self, data_directory):
@@ -160,37 +157,36 @@ class CrUXRepoManager:
         latest = max(self._get_existing_YYYYMM(path))
         return str(latest[0]) + str(latest[1]).zfill(2)
 
+    def _update_latest_from_dir(self, source_dir: str, dest_filename: str) -> None:
+        if not os.path.isdir(source_dir):
+            return
+
+        existing = list(self._get_existing_YYYYMM(source_dir))
+        if not existing:
+            return
+
+        latest_yyyymm = self._latest_yyyymm(source_dir)
+        latest_filename = latest_yyyymm + ".csv.gz"
+
+        src_path = os.path.join(source_dir, latest_filename)
+        if not os.path.exists(src_path):
+            return
+
+        dst_path = os.path.join(source_dir, dest_filename)
+        shutil.copy(src_path, dst_path)
+
     def update_current(self, dest="current.csv.gz"):
         # Global current.csv.gz
-        latest_yyyymm = self._latest_yyyymm(self._global_directory)
-        latest_filename = latest_yyyymm + ".csv.gz"
-        src_path = os.path.join(self._global_directory, latest_filename)
-        assert os.path.exists(src_path)
-
-        dst_path = os.path.join(self._global_directory, dest)
-        shutil.copyfile(src_path, dst_path)
+        self._update_latest_from_dir(self._global_directory, dest)
 
         # Country current.csv.gz
         if os.path.exists(self._country_directory):
             for country in os.listdir(self._country_directory):
                 country_directory = os.path.join(self._country_directory, country)
-
-                if not os.path.isdir(country_directory):
-                    continue
-
-                existing = list(self._get_existing_YYYYMM(country_directory))
-                if not existing:
-                    continue
-
-                latest_yyyymm = self._latest_yyyymm(country_directory)
-                latest_filename = latest_yyyymm + ".csv.gz"
-
-                src_path = os.path.join(country_directory, latest_filename)
-                if os.path.exists(src_path):
-                    dst_path = os.path.join(country_directory, dest)
-                    shutil.copy(src_path, dst_path)
+                self._update_latest_from_dir(country_directory, dest)
 
         # /data/latest.txt
+        latest_yyyymm = self._latest_yyyymm(self._global_directory)
         latest_path = os.path.join(self._data_directory, "latest.txt")
         with open(latest_path, "w") as f:
             f.write(latest_yyyymm + "\n")
