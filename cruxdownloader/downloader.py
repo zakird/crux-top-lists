@@ -44,26 +44,27 @@ class CrUXDownloader:
 
     def get_countries(self):
         job_config = bigquery.QueryJobConfig()
-        df= self._bq_client.query(self.LIST_COUNTRIES_SQL, job_config=job_config).to_dataframe()
+        df = self._bq_client.query(self.LIST_COUNTRIES_SQL, job_config=job_config).to_dataframe()
         if df.empty:
             raise Exception("Unable to fetch countries")
         for _, r in df.sample(frac=1).iterrows():
-            yield(r["country_code"])
+            yield (r["country_code"])
 
     def dump_month_to_csv(self, scope, yyyymm: int, path, country_code=None):
         query_parameters = [
-                bigquery.ScalarQueryParameter(None, "INT64", yyyymm),
-            ]
+            bigquery.ScalarQueryParameter(None, "INT64", yyyymm),
+        ]
         if scope == "global":
             query = self.GLOBAL_SQL
         elif scope == "country":
             query = self.COUNTRY_SQL
-            assert(country_code)
-            query_parameters.append(bigquery.ScalarQueryParameter(None,
-                                                                  "STRING",
-                                                                  country_code))
+            assert country_code
+            query_parameters.append(
+                bigquery.ScalarQueryParameter(None, "STRING", country_code)
+            )
         else:
             raise Exception("Invalid Scope")
+
         job_config = bigquery.QueryJobConfig(
             query_parameters=query_parameters
         )
@@ -85,15 +86,13 @@ class CrUXRepoManager:
         now = datetime.datetime.now()
         last_month = now + relativedelta.relativedelta(months=-1)
         for dt in rrule.rrule(rrule.MONTHLY, dtstart=cls.MIN_YYYYMM,
-                until=last_month):
+                              until=last_month):
             yield (dt.year, dt.month)
 
     def __init__(self, data_directory):
         self._data_directory = data_directory
-        self._global_directory = os.path.join(data_directory,
-                self.GLOBAL_DIR_NAME)
-        self._country_directory = os.path.join(data_directory,
-                self.COUNTRY_DIR_NAME)
+        self._global_directory = os.path.join(data_directory, self.GLOBAL_DIR_NAME)
+        self._country_directory = os.path.join(data_directory, self.COUNTRY_DIR_NAME)
 
     def _get_existing_YYYYMM(self, path):
         for f in os.listdir(path):
@@ -122,7 +121,7 @@ class CrUXRepoManager:
             with gzip.open(gzipped_filename, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
         if delete_original:
-           os.remove(filename)
+            os.remove(filename)
 
     def download(self, credentials_path=None, credentials_json=None, credentials_env=False):
         downloader = CrUXDownloader(
@@ -132,6 +131,7 @@ class CrUXRepoManager:
         )
 
         self._make_directories()
+
         # global
         data_directory = self._global_directory
         for yyyymm in self._to_fetch_YYYYMM(data_directory):
@@ -140,6 +140,7 @@ class CrUXRepoManager:
             results_path = os.path.join(data_directory, filename)
             if downloader.dump_month_to_csv("global", yyyymm, results_path):
                 self._gzip(results_path)
+
         # per-country data
         parent_data_directory = self._country_directory
         for country in downloader.get_countries():
@@ -147,14 +148,13 @@ class CrUXRepoManager:
             data_directory = os.path.join(parent_data_directory, country)
             if not os.path.exists(data_directory):
                 os.mkdir(data_directory)
+
             for yyyymm in self._to_fetch_YYYYMM(data_directory):
                 print("Fetching {} {}".format(country, yyyymm))
                 filename = str(yyyymm) + ".csv"
                 results_path = os.path.join(data_directory, filename)
-                if downloader.dump_month_to_csv("country", yyyymm, results_path,
-                                                country):
+                if downloader.dump_month_to_csv("country", yyyymm, results_path, country):
                     self._gzip(results_path)
-
 
     def _latest_yyyymm(self, path):
         latest = max(self._get_existing_YYYYMM(path))
@@ -163,10 +163,9 @@ class CrUXRepoManager:
     def update_current(self, dest="current.csv.gz"):
         # Global current.csv.gz
         latest_yyyymm = self._latest_yyyymm(self._global_directory)
-
         latest_filename = latest_yyyymm + ".csv.gz"
         src_path = os.path.join(self._global_directory, latest_filename)
-        assert(os.path.exists(src_path))
+        assert os.path.exists(src_path)
 
         dst_path = os.path.join(self._global_directory, dest)
         shutil.copyfile(src_path, dst_path)
@@ -174,10 +173,7 @@ class CrUXRepoManager:
         # Country current.csv.gz
         if os.path.exists(self._country_directory):
             for country in os.listdir(self._country_directory):
-                country_directory = os.path.join(
-                    self._country_directory,
-                    country,
-                )
+                country_directory = os.path.join(self._country_directory, country)
 
                 if not os.path.isdir(country_directory):
                     continue
@@ -186,15 +182,10 @@ class CrUXRepoManager:
                 if not existing:
                     continue
 
-                latest = max(existing)
-                latest_yyyymm = str(latest[0]) + str(latest[1]).zfill(2)
-
+                latest_yyyymm = self._latest_yyyymm(country_directory)
                 latest_filename = latest_yyyymm + ".csv.gz"
-                src_path = os.path.join(
-                    country_directory,
-                    latest_filename,
-                )
 
+                src_path = os.path.join(country_directory, latest_filename)
                 if os.path.exists(src_path):
                     dst_path = os.path.join(country_directory, dest)
                     shutil.copy(src_path, dst_path)
