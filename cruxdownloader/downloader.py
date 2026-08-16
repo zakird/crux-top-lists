@@ -13,7 +13,6 @@ from google.oauth2 import service_account
 
 
 class CrUXDownloader:
-
     GLOBAL_SQL = """SELECT distinct origin, experimental.popularity.rank
         FROM `chrome-ux-report.experimental.global`
         WHERE yyyymm = ? AND experimental.popularity.rank <= 1000000
@@ -44,26 +43,27 @@ class CrUXDownloader:
 
     def get_countries(self):
         job_config = bigquery.QueryJobConfig()
-        df= self._bq_client.query(self.LIST_COUNTRIES_SQL, job_config=job_config).to_dataframe()
+        df = self._bq_client.query(self.LIST_COUNTRIES_SQL, job_config=job_config).to_dataframe()
         if df.empty:
             raise Exception("Unable to fetch countries")
         for _, r in df.sample(frac=1).iterrows():
-            yield(r["country_code"])
+            yield (r["country_code"])
 
     def dump_month_to_csv(self, scope, yyyymm: int, path, country_code=None):
         query_parameters = [
-                bigquery.ScalarQueryParameter(None, "INT64", yyyymm),
-            ]
+            bigquery.ScalarQueryParameter(None, "INT64", yyyymm),
+        ]
         if scope == "global":
             query = self.GLOBAL_SQL
         elif scope == "country":
             query = self.COUNTRY_SQL
-            assert(country_code)
-            query_parameters.append(bigquery.ScalarQueryParameter(None,
-                                                                  "STRING",
-                                                                  country_code))
+            assert country_code
+            query_parameters.append(
+                bigquery.ScalarQueryParameter(None, "STRING", country_code)
+            )
         else:
             raise Exception("Invalid Scope")
+
         job_config = bigquery.QueryJobConfig(
             query_parameters=query_parameters
         )
@@ -75,7 +75,6 @@ class CrUXDownloader:
 
 
 class CrUXRepoManager:
-
     MIN_YYYYMM = datetime.datetime(2025, 1, 1)
     GLOBAL_DIR_NAME = "global"
     COUNTRY_DIR_NAME = "country"
@@ -84,16 +83,13 @@ class CrUXRepoManager:
     def _iter_valid_YYYYMM(cls):
         now = datetime.datetime.now()
         last_month = now + relativedelta.relativedelta(months=-1)
-        for dt in rrule.rrule(rrule.MONTHLY, dtstart=cls.MIN_YYYYMM,
-                until=last_month):
+        for dt in rrule.rrule(rrule.MONTHLY, dtstart=cls.MIN_YYYYMM, until=last_month):
             yield (dt.year, dt.month)
 
     def __init__(self, data_directory):
         self._data_directory = data_directory
-        self._global_directory = os.path.join(data_directory,
-                self.GLOBAL_DIR_NAME)
-        self._country_directory = os.path.join(data_directory,
-                self.COUNTRY_DIR_NAME)
+        self._global_directory = os.path.join(data_directory, self.GLOBAL_DIR_NAME)
+        self._country_directory = os.path.join(data_directory, self.COUNTRY_DIR_NAME)
 
     def _get_existing_YYYYMM(self, path):
         for f in os.listdir(path):
@@ -122,7 +118,7 @@ class CrUXRepoManager:
             with gzip.open(gzipped_filename, 'wb') as f_out:
                 shutil.copyfileobj(f_in, f_out)
         if delete_original:
-           os.remove(filename)
+            os.remove(filename)
 
     def download(self, credentials_path=None, credentials_json=None, credentials_env=False):
         downloader = CrUXDownloader(
@@ -132,6 +128,7 @@ class CrUXRepoManager:
         )
 
         self._make_directories()
+
         # global
         data_directory = self._global_directory
         for yyyymm in self._to_fetch_YYYYMM(data_directory):
@@ -140,6 +137,7 @@ class CrUXRepoManager:
             results_path = os.path.join(data_directory, filename)
             if downloader.dump_month_to_csv("global", yyyymm, results_path):
                 self._gzip(results_path)
+
         # per-country data
         parent_data_directory = self._country_directory
         for country in downloader.get_countries():
@@ -147,21 +145,48 @@ class CrUXRepoManager:
             data_directory = os.path.join(parent_data_directory, country)
             if not os.path.exists(data_directory):
                 os.mkdir(data_directory)
+
             for yyyymm in self._to_fetch_YYYYMM(data_directory):
                 print("Fetching {} {}".format(country, yyyymm))
                 filename = str(yyyymm) + ".csv"
                 results_path = os.path.join(data_directory, filename)
-                if downloader.dump_month_to_csv("country", yyyymm, results_path,
-                                                country):
+                if downloader.dump_month_to_csv("country", yyyymm, results_path, country):
                     self._gzip(results_path)
 
+    def _latest_yyyymm(self, path):
+        latest = max(self._get_existing_YYYYMM(path))
+        return str(latest[0]) + str(latest[1]).zfill(2)
 
-    def update_current(self, dest):
-        # Global Only right now
-        latest = max(self._get_existing_YYYYMM(self._global_directory))
-        latest_filename = str(latest[0]) + str(latest[1]).zfill(2) + ".csv.gz"
-        src_path = os.path.join(self._global_directory, latest_filename)
-        assert(os.path.exists(src_path))
-        dst_path = os.path.join(self._global_directory, dest)
-        shutil.copyfile(src_path, dst_path)
+    def _update_latest_from_dir(self, source_dir: str, dest_filename: str) -> None:
+        if not os.path.isdir(source_dir):
+            return
 
+        existing = list(self._get_existing_YYYYMM(source_dir))
+        if not existing:
+            return
+
+        latest_yyyymm = self._latest_yyyymm(source_dir)
+        latest_filename = latest_yyyymm + ".csv.gz"
+
+        src_path = os.path.join(source_dir, latest_filename)
+        if not os.path.exists(src_path):
+            return
+
+        dst_path = os.path.join(source_dir, dest_filename)
+        shutil.copy(src_path, dst_path)
+
+    def update_current(self, dest="current.csv.gz"):
+        # Global current.csv.gz
+        self._update_latest_from_dir(self._global_directory, dest)
+
+        # Country current.csv.gz
+        if os.path.exists(self._country_directory):
+            for country in os.listdir(self._country_directory):
+                country_directory = os.path.join(self._country_directory, country)
+                self._update_latest_from_dir(country_directory, dest)
+
+        # /data/latest.txt
+        latest_yyyymm = self._latest_yyyymm(self._global_directory)
+        latest_path = os.path.join(self._data_directory, "latest.txt")
+        with open(latest_path, "w") as f:
+            f.write(latest_yyyymm + "\n")
